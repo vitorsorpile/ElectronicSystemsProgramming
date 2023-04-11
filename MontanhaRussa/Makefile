@@ -47,4 +47,4 @@ run:
 
 valgrind:
 	$(MAKE)
-	valgrind -s ./$(PROJ_NAME)
+	valgrind -s --leak-check=full --show-leak-kinds=all ./$(PROJ_NAME)

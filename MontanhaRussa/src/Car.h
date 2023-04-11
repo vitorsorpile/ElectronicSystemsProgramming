@@ -21,15 +21,16 @@ private:
 	const unsigned int MAX_PASSENGERS = 4;
 	int _id;
 	std::mutex _carMtx;
+	std::mutex* _coutMtx;
 	unsigned int _boardedPassengers = 0;
 	std::vector<Passenger*> passengersInTheCar;
 	CarStatus _status = CarStatus::Loading;
 
 public:
-	Car(int);
+	Car(int, std::mutex *);
 	Car(const Car&);
 	~Car() {/*delete car_cv;*/}
-	std::condition_variable *car_cv;
+	std::condition_variable car_cv;
 	std::condition_variable boardedPassengersCV;
 
 	void operator()(std::shared_ptr<std::condition_variable> passengersCV);

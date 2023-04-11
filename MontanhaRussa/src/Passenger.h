@@ -18,11 +18,12 @@ private:
 	// std::shared_ptr<std::mutex> _carMtx;
 	// unsigned int *_boardedPassengers = nullptr;
 	std::shared_ptr<std::condition_variable> _passengerCV;
+	std::mutex *_coutMtx;
 
 public:
-	Passenger(int, std::shared_ptr<std::condition_variable>);
+	Passenger(int, std::shared_ptr<std::condition_variable>, std::mutex*);
 
-	void operator()(std::vector<Car> &cars);
+	void operator()(std::vector<std::shared_ptr<Car>> &cars);
 };
 
 #endif
