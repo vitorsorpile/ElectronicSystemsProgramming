@@ -9,7 +9,6 @@
 #include <vector>
 #include "Car.h"
 
-class Car;
 
 class Passenger
 {

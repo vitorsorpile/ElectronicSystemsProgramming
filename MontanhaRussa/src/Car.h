@@ -8,9 +8,7 @@
 #include <condition_variable>
 #include <chrono>
 #include <vector>
-#include "Passenger.h"
 
-class Passenger;
 
 enum class CarStatus {Loading, Unloading, Running};
 
@@ -23,7 +21,6 @@ private:
 	std::mutex _carMtx;
 	std::mutex* _coutMtx;
 	unsigned int _boardedPassengers = 0;
-	std::vector<Passenger*> passengersInTheCar;
 	CarStatus _status = CarStatus::Loading;
 
 public:
@@ -38,7 +35,7 @@ public:
 	// void unlock();
 	unsigned int getBoardedPassengers();
 	bool enterCar(int passengerID);
-	unsigned int leaveCar(int passengerID);
+	bool leaveCar(int passengerID);
 	bool isFull();
 	int getID();
 	CarStatus getStatus();

@@ -26,54 +26,34 @@ void Car::operator()(std::shared_ptr<std::condition_variable> passengersCV) {
 	std::mutex mtx;
 	std::unique_lock<std::mutex> lck(mtx, std::defer_lock);
 	
-	// _coutMtx->lock();
-	// std::cout << std::this_thread::get_id() << " - Car " << _id << " - " << &car_cv << "\n";
-	// std::cout << "[functor] Car " << _id << " - " << this << "\n";
-	// _coutMtx->unlock();
-	// std::this_thread::sleep_for(std::chrono::milliseconds(200));
 	while(true) {
 		
 		// Wait passengers board - load()
 		_status = CarStatus::Loading;
 		passengersCV->notify_all();
-		// _coutMtx->lock();
-		// std::cout << std::this_thread::get_id() << " - Car " << _id << " - " << _boardedPassengers << "\n";
-		// _coutMtx->unlock();
 
 		while(_status != CarStatus::Running) {
-			// std::cout << std::this_thread::get_id() << " - " << this << " - " << _id << " -> " << _boardedPassengers << std::endl;
 			car_cv.wait(lck);
 		}
-		// std::cout << "Starting ride for Car " << _id << "\n";
 
-		// Ride - run()
-		// _coutMtx->lock();
-		// std::cout << "Car " << _id << " tried to get _carMtx" << "\n";
-		// _coutMtx->unlock();
-
-		_carMtx.lock();
-		_status = CarStatus::Running;
-
+		/* Ride - run() */
 		_coutMtx->lock();
 		std::cout << "Starting ride for Car " << _id << " - " << _boardedPassengers << " passengers on board" << "\n";
 		_coutMtx->unlock();
-
 		std::this_thread::sleep_for(std::chrono::seconds(5));
+
+		/* Wait passenger unboard - unload()*/
 		_status = CarStatus::Unloading;
 
 		_coutMtx->lock();
 		std::cout << "Finished ride of Car " << _id << " - " << _boardedPassengers << " passengers on board" << "\n";
 		_coutMtx->unlock();
 
-		_carMtx.unlock();
 		boardedPassengersCV.notify_all();
 
-		// Wait passengers unload - unload()
 		while(_boardedPassengers != 0) {
 			car_cv.wait(lck);
 		}
-
-
 	}
 }
 
@@ -85,33 +65,47 @@ bool Car::enterCar(int passengerID) {
 	
 	_carMtx.lock();
 
-	if (_boardedPassengers == MAX_PASSENGERS) {
-		_coutMtx->lock();
-		std::cout << std::this_thread::get_id() << " - " << this << " - There was no space for Passenger " << passengerID << " on Car " << _id << "\n";
-		_coutMtx->unlock();
-
+	if (_status != CarStatus::Loading) {
 		_carMtx.unlock();
 		return false;
 	}
+	// if (_boardedPassengers == MAX_PASSENGERS) {
+	// 	_coutMtx->lock();
+	// 	std::cout << /* std::this_thread::get_id() << " - " << this << */" - There was no space for Passenger " << passengerID << " on Car " << _id << "\n";
+	// 	_coutMtx->unlock();
+
+	// 	_carMtx.unlock();
+	// 	return false;
+	// }
 	else {
 		_coutMtx->lock();
-		std::cout << std::this_thread::get_id() << " - " << this << " - Passenger " << passengerID << " entered Car " << _id << "\n";
+		std::cout << /*std::this_thread::get_id() << " - " << this << */" - Passenger " << passengerID << " entered Car " << _id << "\n";
 		_coutMtx->unlock();
 
 		_boardedPassengers++;
 		if (_boardedPassengers == MAX_PASSENGERS) {
 			_status = CarStatus::Running;
+			_coutMtx->lock();
+			std::cout << "Notifying car " << this->getID() << " to start the ride. " /*<< &(car)*/ << "\n";
+			_coutMtx->unlock();
+			this->car_cv.notify_one();
 		}
 		_carMtx.unlock();
 		return true;
 	}
 }
 
-unsigned int Car::leaveCar(int passengerID) {
+bool Car::leaveCar(int passengerID) {
+
+	if (_status != CarStatus::Unloading) return false;
 	_carMtx.lock();
 	_boardedPassengers--;
 	_carMtx.unlock();
-	return _boardedPassengers;
+
+	if (_boardedPassengers == 0) {
+		this->car_cv.notify_one();
+	}
+	return true;
 }
 
 bool Car::isFull() {
