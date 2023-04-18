@@ -1,4 +1,4 @@
-PROJ_NAME=Montanha_Russa
+PROJ_NAME=MontanhaRussa
 
 # .c files
 C_SOURCE=$(wildcard src/*.cpp)
