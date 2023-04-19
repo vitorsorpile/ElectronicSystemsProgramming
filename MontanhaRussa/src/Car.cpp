@@ -33,7 +33,8 @@ void Car::operator()(std::shared_ptr<std::condition_variable> passengersCV) {
 		passengersCV->notify_all();
 
 		while(_status != CarStatus::Running) {
-			car_cv.wait(lck);
+			car_cv.wait_for(lck, std::chrono::milliseconds(500));
+			passengersCV->notify_all();
 		}
 
 		/* Ride - run() */

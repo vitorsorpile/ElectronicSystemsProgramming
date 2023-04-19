@@ -15,6 +15,8 @@ void Passenger::operator()(std::vector<std::shared_ptr<Car>> &cars) {
 	while(true) {
 		std::shared_ptr<Car> enteredCar = nullptr;
 
+		_passengerCV->wait(lck);
+
 		for (auto &car : cars) {
 			if ( car->enterCar(this->_id)) {
 				
