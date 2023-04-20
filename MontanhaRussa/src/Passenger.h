@@ -14,8 +14,6 @@ class Passenger
 {
 private:
 	int _id;
-	// std::shared_ptr<std::mutex> _carMtx;
-	// unsigned int *_boardedPassengers = nullptr;
 	std::shared_ptr<std::condition_variable> _passengerCV;
 	std::mutex *_coutMtx;
 
